@@ -107,7 +107,7 @@ async function finishedGames(req,res,next) {
 
 async function notFinishedGames(req,res) {
     const username = req.username
-    console.log(username);
+   
     
     
     const Games = await Game.find(
@@ -122,6 +122,7 @@ async function notFinishedGames(req,res) {
     }
     )
     console.log(Games);
+    
     
     
     return res.status(200).json(Games)

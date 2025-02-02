@@ -85,11 +85,13 @@
             });
 
             const games = await response.json();
-
+            console.log(games);
+            
             document.getElementById('notFinishedGames').innerHTML = games.map(game => `
                 <li>
                     <strong>Game ID:</strong> ${game._id}<br>
                     <strong>Player 1:</strong> ${game.player1} (${game.player1Choice})<br>
+                    <strong>Started at:</strong> ${new Date(game.updatedAt).toLocaleString()}<br>
                     <strong>Waiting for opponent...</strong>
                 </li>
             `).join('');
