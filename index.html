@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        select, button { margin: 10px; padding: 10px; }
+        ul { list-style-type: none; padding: 0; }
+        li { background: #f4f4f4; margin: 10px; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Rock Paper Scissors</h2>
+    <p>Welcome, <span id="usernameDisplay"></span></p>
+    <!-- <button onclick="logout()">Logout</button> -->
+    
+    <select id="choice">
+        <option value="rock">Rock</option>
+        <option value="paper">Paper</option>
+        <option value="scissors">Scissors</option>
+    </select>
+    <button onclick="play()">Play</button>
+
+    <h3>Game History</h3>
+    <button onclick="getFinishedGames()">Refresh Finished Games</button>
+    <ul id="finishedGames"></ul>
+
+    <button onclick="getNotFinishedGames()">Refresh Not Finished Games</button>
+    <ul id="notFinishedGames"></ul>
+
+    <script>
+        const username = localStorage.getItem('currentUser');
+        if (!username) {
+            window.location.href = "login.html";
+        }
+        document.getElementById('usernameDisplay').innerText = username;
+
+        const token = localStorage.getItem(`token_${username}`);
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+            async function play() {
+        const choice = document.getElementById('choice').value;
+        
+        const response = await fetch('http://localhost:3000/play', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify({ choice }) // Fixed spelling
+        });
+
+        const result = await response.json();
+        console.log(result);
+        alert('Game played!');
+    }
+        async function getFinishedGames() {
+            const response = await fetch('http://localhost:3000/finishedGames', {
+                method: 'GET',
+                headers: { 'Authorization': token }
+            });
+
+            const games = await response.json();
+            console.log(games);
+            
+            document.getElementById('finishedGames').innerHTML = games.map(game => `
+                <li>
+                    <strong>Game ID:</strong> ${game._id}<br>
+                    <strong>Player 1:</strong> ${game.player1} (${game.player1Choice})<br>
+                    <strong>Player 2:</strong> ${game.player2} (${game.player2Choice})<br>
+                    <strong>Result:</strong> ${game.result}<br>
+                    <strong>Finished at:</strong> ${new Date(game.updatedAt).toLocaleString()}
+                </li>
+            `).join('');
+        }
+
+        async function getNotFinishedGames() {
+            const response = await fetch('http://localhost:3000/notFinishedGames', {
+                method: 'GET',
+                headers: { 'Authorization': token }
+            });
+
+            const games = await response.json();
+
+            document.getElementById('notFinishedGames').innerHTML = games.map(game => `
+                <li>
+                    <strong>Game ID:</strong> ${game._id}<br>
+                    <strong>Player 1:</strong> ${game.player1} (${game.player1Choice})<br>
+                    <strong>Waiting for opponent...</strong>
+                </li>
+            `).join('');
+        }
+
+        function logout() {
+            localStorage.removeItem(`token_${username}`);
+            localStorage.removeItem('currentUser');
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
+
+
+
